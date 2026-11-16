@@ -94,7 +94,7 @@ async def BT_GetData():
             #print(f"Received {len(data)} bytes: {data.hex(' ')}")
             WIT.DoIt(data)
             # debug below
-            #print(WIT)
+            print(WIT)
             """
             Use acceleration. But lets change this into angles.
             Rotation about X is theta
@@ -102,13 +102,29 @@ async def BT_GetData():
             Normalize by total vector
             """
             #Tx.Tuple(WIT.acc[0], WIT.acc[1], WIT.acc[2])
-            x = WIT.acc[0]
-            y = WIT.acc[1]
-            z = WIT.acc[2]
-            norm = np.sqrt(x*x + y*y + z*z)
-            
-            theta = 360.0/3.141526 * np.arccos(y/norm)
-            phi   = 360.0/3.141526 * np.arccos(x/norm)
+            coord = 2
+            if coord == 0:
+                x = WIT.acc[0]
+                y = WIT.acc[1]
+                z = WIT.acc[2]
+                norm = np.sqrt(x*x + y*y + z*z)
+                x = x/norm
+                y = y/norm
+                z = z/norm
+                # this is essentially 1 g
+                theta = 180.0/np.pi * np.arccos(z)
+                phi   = 180.0/np.pi * np.arctan2(y,x)
+            elif coord==1:
+                x = WIT.w[0]
+                y = WIT.w[1]
+                z = WIT.w[2]
+            else:
+                x   = WIT.rpy[0]
+                # Bring to equator, sensor does +/- 90
+                theta = WIT.rpy[1] + 90.0
+                phi = WIT.rpy[2]
+                # results are in degrees, 
+
             Tx.Theta(theta)
             Tx.Phi(phi)
             
@@ -118,7 +134,7 @@ async def BT_GetData():
             )
         print("Listening for sensor data...")
         # This code says go to sleep for 15 seconds
-        await asyncio.sleep(30)
+        await asyncio.sleep(60)
         #await asyncio.sleep() # wait indefinitely
         
         await client.stop_notify(

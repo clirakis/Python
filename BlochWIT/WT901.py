@@ -12,6 +12,14 @@
   References:
   
   Notes:
+  Commands for future reference, page 19 in manual
+  FF AA 27 40 00 - Read Temperature
+  FF AA 01 01 00 - Accelerometer calibration
+  FF AA 01 07 00 - Magnetic Calibration
+  FF AA 01 00 00 - Quit calibration
+  FF AA 00 xx 00 - Save or restore  xx = 0 Save config, xx = 1 restore default
+  FF AA 03 RR 00 - Set rate, default is 10 Hz
+
 
   ####################################################################
 """
@@ -30,9 +38,9 @@ class WT901:
         @brief constructor for class.
         """
         # allocate arrays for the return values
-        self.acc = np.zeros(3)
-        self.rph = np.zeros(3)
-        self.mag = np.zeros(3)
+        self.acc = np.zeros(3)  # acceleration
+        self.w   = np.zeros(3)  # rate of rotation around various axis
+        self.rpy = np.zeros(3)  # sensor fused data. RPY
 
     def __del__(self):
         """
@@ -44,7 +52,7 @@ class WT901:
         """
         @brief - format data into a string 
         """
-        rv = f'{self.acc[0]:.1f}, {self.acc[1]:.1f}, {self.acc[2]:.1f}, {self.rph[0]:.1f}, {self.rph[1]:.1f}, {self.rph[2]:.1f}, {self.mag[0]:.4f}, {self.mag[1]:.4f}, {self.mag[2]:.4f}'
+        rv = f'{self.acc[0]:.1f}, {self.acc[1]:.1f}, {self.acc[2]:.1f}, {self.w[0]:.1f}, {self.w[1]:.1f}, {self.w[2]:.1f}, {self.rpy[0]:.4f}, {self.rpy[1]:.4f}, {self.rpy[2]:.4f}'
         return rv
    
     def DumpHex(self,data):
@@ -83,8 +91,8 @@ class WT901:
         # leave in units of g, +/- 2g unless super big
         for i in range(3):
             self.acc[i] = values[i]/32768.0 * 16
-            self.rph[i] = values[i+3]/32768.0 * 2000  # degrees/s
-            self.mag[i] = values[i+6]/32768.0         # mg
+            self.w[i]   = values[i+3]/32768.0 * 2000.  # degrees/s
+            self.rpy[i] = values[i+6]/32768.0 * 180.0  # rpy
 
     def DoIt(self, data):
         """
