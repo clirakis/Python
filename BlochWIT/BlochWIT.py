@@ -93,8 +93,24 @@ async def BT_GetData():
         def notification_handler(sender,data):
             #print(f"Received {len(data)} bytes: {data.hex(' ')}")
             WIT.DoIt(data)
-            print(WIT)
-            Tx.Tuple(WIT.acc[0], WIT.acc[1], WIT.acc[2])
+            # debug below
+            #print(WIT)
+            """
+            Use acceleration. But lets change this into angles.
+            Rotation about X is theta
+            Rotation about Y is phi
+            Normalize by total vector
+            """
+            #Tx.Tuple(WIT.acc[0], WIT.acc[1], WIT.acc[2])
+            x = WIT.acc[0]
+            y = WIT.acc[1]
+            z = WIT.acc[2]
+            norm = np.sqrt(x*x + y*y + z*z)
+            
+            theta = 360.0/3.141526 * np.arccos(y/norm)
+            phi   = 360.0/3.141526 * np.arccos(x/norm)
+            Tx.Theta(theta)
+            Tx.Phi(phi)
             
         await client.start_notify(
             "0000ffe4-0000-1000-8000-00805f9a34fb",
@@ -102,7 +118,7 @@ async def BT_GetData():
             )
         print("Listening for sensor data...")
         # This code says go to sleep for 15 seconds
-        await asyncio.sleep(10)
+        await asyncio.sleep(30)
         #await asyncio.sleep() # wait indefinitely
         
         await client.stop_notify(

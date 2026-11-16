@@ -73,6 +73,26 @@ class TxOSC:
         Send a tuple
         """
         self.client.send_message("/TUPLE", [x,y,z])
+
+    def Theta(self, val):
+        """
+        angle in degrees Y rotation
+        """
+        self.client.send_message("/bloch/Theta",val)
+
+    def Phi(self, val):
+        """
+        angle in degrees Z rotation. 
+        """
+        self.client.send_message("/bloch/Phi",val)
+
+    def Bloch(self, theta, phi):
+        """
+        Send the angles of the bloch sphere
+        theta - y rotation
+        phi   - z rotation
+        """
+        self.client.send_message("/Bloch",[theta,phi])
         
     def FreqPhase(self, f=440.0, phi=0.0, osc=1):
         """
